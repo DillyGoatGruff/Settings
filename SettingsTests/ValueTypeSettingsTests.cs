@@ -20,7 +20,7 @@ namespace SettingsTests
         }
     }
 
-    public class PrimativeSettingsTests
+    public class ValueTypeSettingsTests
     {
 
         [Fact]
