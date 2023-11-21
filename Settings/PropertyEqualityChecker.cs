@@ -22,9 +22,9 @@ namespace Settings
 			base.Reset(_settings!);
 		}
 
-		public void Reload()
+		public void Reload(T settings)
 		{
-
+			base.Reload(_settings, settings);
 		}
 
 		public void UpdateSavedValues(T settings)
@@ -32,9 +32,9 @@ namespace Settings
 			base.UpdateSavedValues(settings!);
 		}
 
-		public bool CheckIsDirty(T settings)
+		public bool CheckIsDirty()
 		{
-			return base.CheckIsDirty(settings!);
+			return base.CheckIsDirty(_settings!);
 		}
 	}
 
@@ -118,47 +118,70 @@ namespace Settings
 		/// <summary>
 		/// Resets all settings values to the default values.
 		/// </summary>
-		/// <param name="settings">The object to reset back to default values.</param>
-		public void Reset(object settings)
+		/// <param name="currentSettings">The object to reset back to default values.</param>
+		public void Reset(object currentSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
 				PropertyInfoValue defaultPropertyInfoValue = _defaultPropertyInfoValues[i];
-				defaultPropertyInfoValue.PropertyInfo.SetValue(settings, defaultPropertyInfoValue.Value);
+				defaultPropertyInfoValue.PropertyInfo.SetValue(currentSettings, defaultPropertyInfoValue.Value);
 			}
 
 			for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
 			{
 				PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
-				object? value = propertyEqualityChecker.GetPropertyValue(settings);
+				object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
 				propertyEqualityChecker.Reset(value);
 			}
 		}
 
-
-
-		public void UpdateSavedValues(object settings)
+		/// <summary>
+		/// Updates <paramref name="currentSettings"/> and the saved values to those within <paramref name="newSettings"/>.
+		/// </summary>
+		/// <param name="currentSettings">The current settings to update.</param>
+		/// <param name="newSettings">The new settings to update values to.</param>
+		public void Reload(object currentSettings, object newSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
-				object? value = _savedPropertyInfoValues[i].PropertyInfo.GetValue(settings);
+				PropertyInfo propertyInfo = _savedPropertyInfoValues[i].PropertyInfo;
+				object? value = propertyInfo.GetValue(newSettings);
+
+				propertyInfo.SetValue(currentSettings, value);
 				_savedPropertyInfoValues[i] = _savedPropertyInfoValues[i] with { Value = value };
 			}
 
 			for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
 			{
 				PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
-				object? value = propertyEqualityChecker.GetPropertyValue(settings);
+				object? currentValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
+				object? newValue = propertyEqualityChecker.GetPropertyValue(newSettings);
+				propertyEqualityChecker.Reload(currentValue, newValue);
+			}
+		}
+
+		public void UpdateSavedValues(object currentSettings)
+		{
+			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
+			{
+				object? value = _savedPropertyInfoValues[i].PropertyInfo.GetValue(currentSettings);
+				_savedPropertyInfoValues[i] = _savedPropertyInfoValues[i] with { Value = value };
+			}
+
+			for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
+			{
+				PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
+				object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
 				propertyEqualityChecker.UpdateSavedValues(value);
 			}
 		}
 
-		public bool CheckIsDirty(object? settings)
+		public bool CheckIsDirty(object? currentSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
 				PropertyInfoValue savedPropertyInfoValue = _savedPropertyInfoValues[i];
-				object? value = savedPropertyInfoValue.PropertyInfo.GetValue(settings);
+				object? value = savedPropertyInfoValue.PropertyInfo.GetValue(currentSettings);
 				if (!value?.Equals(savedPropertyInfoValue.Value) ?? savedPropertyInfoValue.Value is not null)
 				{
 					return false;
@@ -168,7 +191,7 @@ namespace Settings
 			for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
 			{
 				PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
-				object? savedValue = propertyEqualityChecker.GetPropertyValue(settings);
+				object? savedValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
 				if (propertyEqualityChecker.CheckIsDirty(savedValue))
 				{
 					return true;
