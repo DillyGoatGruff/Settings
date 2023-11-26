@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,7 +13,7 @@ namespace Settings
 		private readonly T _settings;
 
 
-		public PropertyEqualityChecker(T settings) : base(default!, settings!, Activator.CreateInstance(typeof(T))!)
+		public PropertyEqualityChecker(T settings) : base(default!, settings!, settings!)
 		{
 			_settings = settings;
 		}
@@ -83,7 +84,7 @@ namespace Settings
 				else
 				{
 					defaultPropertyInfoValues.Add(new PropertyInfoValue(tempPropertyInfos[i], defaultPropertyValue));
-					savedPropertyInfoValues.Add(new PropertyInfoValue(tempPropertyInfos[i], savedPropertyInfoValues));
+					savedPropertyInfoValues.Add(new PropertyInfoValue(tempPropertyInfos[i], savedPropertyValue));
 				}
 			}
 
@@ -119,7 +120,7 @@ namespace Settings
 		/// Resets all settings values to the default values.
 		/// </summary>
 		/// <param name="currentSettings">The object to reset back to default values.</param>
-		public void Reset(object currentSettings)
+		internal void Reset(object currentSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
@@ -140,7 +141,7 @@ namespace Settings
 		/// </summary>
 		/// <param name="currentSettings">The current settings to update.</param>
 		/// <param name="newSettings">The new settings to update values to.</param>
-		public void Reload(object currentSettings, object newSettings)
+		internal void Reload(object currentSettings, object newSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
@@ -160,7 +161,7 @@ namespace Settings
 			}
 		}
 
-		public void UpdateSavedValues(object currentSettings)
+		internal void UpdateSavedValues(object currentSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
@@ -176,15 +177,16 @@ namespace Settings
 			}
 		}
 
-		public bool CheckIsDirty(object? currentSettings)
+		internal bool CheckIsDirty(object? currentSettings)
 		{
 			for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
 			{
 				PropertyInfoValue savedPropertyInfoValue = _savedPropertyInfoValues[i];
 				object? value = savedPropertyInfoValue.PropertyInfo.GetValue(currentSettings);
+
 				if (!value?.Equals(savedPropertyInfoValue.Value) ?? savedPropertyInfoValue.Value is not null)
 				{
-					return false;
+					return true;
 				}
 			}
 
