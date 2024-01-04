@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Settings
@@ -18,6 +17,7 @@ namespace Settings
 
 		private static readonly PropertyInfo[] m_propertyInfo;
 		private static readonly PropertyInfoValue[] m_defaultPropertyValues;
+
 
 		#region Fields
 
@@ -54,6 +54,7 @@ namespace Settings
 				var temp = Activator.CreateInstance(t);
 				for (int i = 0; i < defaultPropertyInfoValues.Length; i++)
 				{
+					//propertyInfo[i].GetType().N
 					object? value = propertyInfo[i].GetValue(temp);
 					defaultPropertyInfoValues[i] = new PropertyInfoValue(i, value);
 				}
@@ -62,6 +63,8 @@ namespace Settings
 
 			m_propertyInfo = GetPropertyInfo(typeof(T));
 			m_defaultPropertyValues = GetDefaultPropertyInfoValues(typeof(T), m_propertyInfo);
+
+
 		}
 
 
@@ -156,6 +159,19 @@ namespace Settings
 				PropertyInfoValue piValue = propertyValues[i];
 				m_propertyInfo[piValue.PropertyInfoIndex].SetValue(_currentSettings, piValue.Value);
 			}
+		}
+
+		private bool CheckEquality(object obj1, object obj2)
+		{
+			//String is considered a class but can be evaluated by a simple equals check
+			if (obj1 is string) return obj1.Equals(obj2);
+
+			bool isClass = obj1.GetType().IsClass;
+			if (!isClass) return obj1.Equals(obj2);
+
+			//Need to check the properties of each class
+			throw new NotImplementedException();
+
 		}
 
 		#endregion
