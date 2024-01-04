@@ -5,7 +5,7 @@ using Xunit;
 namespace SettingsTests
 {
 
-    internal class SimpleSettings : SettingsBase2<SimpleSettings>
+    internal class SimpleSettings : SettingsBase<SimpleSettings>
     {
         public string Name { get; set; } = "Bob";
         public int Age { get; set; } = 33;

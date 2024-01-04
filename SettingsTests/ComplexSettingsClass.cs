@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SettingsTests
 {
-	public class ComplexSettingsClass : SettingsBase2<ComplexSettingsClass>
+	public class ComplexSettingsClass : SettingsBase<ComplexSettingsClass>
 	{
 		public DateTimeOffset SavedDateTime { get; set; } = DateTimeOffset.Now;
 		public Person PrimaryUser { get; set; } = new Person() { FirstName = "Bob", Age = 33 };
@@ -22,7 +22,7 @@ namespace SettingsTests
 
 	public class Person
 	{
-		public string FirstName { get; set; } 
+		public string FirstName { get; set; }
 		public int Age { get; set; }
 	}
 }
