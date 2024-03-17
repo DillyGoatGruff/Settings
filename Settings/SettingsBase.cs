@@ -3,127 +3,151 @@ using System.Text.Json;
 
 namespace Settings
 {
-	public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>, new()
-	{
+    public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>, new()
+    {
 
-		static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
-		{
-			WriteIndented = true,
-			IncludeFields = true
-		};
+        static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            IncludeFields = true
+        };
 
-		#region Fields
+        #region Fields
 
-		private readonly ISettingsSaver _settingsSaver;
-		private readonly PropertyEqualityChecker<T> _propertyEqualityChecker;
+        private readonly ISettingsSaver _settingsSaver;
+        private readonly PropertyEqualityChecker<T> _propertyEqualityChecker;
 
-		#endregion
-
-
-		#region Properties
+        #endregion
 
 
-
-		#endregion
-
-
-		#region Constructors
-
-		[Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
-			"This constructors should not be called directly.")]
-		protected SettingsBase()
-		{
-			_propertyEqualityChecker = default!;
-			_settingsSaver = default!;
-		}
-
-		protected SettingsBase(ISettingsSaver settingsSaver)
-		{
-			T currentSettings = (T)this;
-			_propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
-			_settingsSaver = settingsSaver;
-		}
-
-		#endregion
+        #region Properties
 
 
-		#region Private Methods
 
-		private static T CreateDefaultSettings()
-		{
-			return new T();
-		}
-
-		private string Serialize()
-		{
-			return JsonSerializer.Serialize<T>((T)this, m_jsonSerializerOptions);
-		}
-
-		private T? Deserialize(string serialization)
-		{
-			try
-			{
-				if (string.IsNullOrWhiteSpace(serialization)) return CreateDefaultSettings();
-				return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
-			}
-			catch (JsonException)
-			{
-				return null;
-			}
-		}
-
-		#endregion
+        #endregion
 
 
-		#region Public Methods
+        #region Constructors
 
-		/// <inheritdoc/>
-		public void Reset()
-		{
-			_propertyEqualityChecker.Reset();
-		}
+        [Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
+            "This constructors should not be called directly.")]
+        protected SettingsBase()
+        {
+            _propertyEqualityChecker = default!;
+            _settingsSaver = default!;
+        }
 
-		/// <inheritdoc/>
-		public bool Reload()
-		{
-			string? serialization = _settingsSaver.GetSavedSerialization();
-			T savedSettings;
-			if (serialization is not null)
-			{
-				savedSettings = Deserialize(serialization) ?? CreateDefaultSettings();
-				_propertyEqualityChecker.Reload(savedSettings);
+        /// <summary>
+        /// Base implementation of <see cref="ISettings"/> ISettings.
+        /// </summary>
+        /// <param name="settingsSaver">Saves and loads settings.</param>
+        protected SettingsBase(ISettingsSaver settingsSaver)
+        {
+            T currentSettings = (T)this;
+            _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
+            _settingsSaver = settingsSaver;
+            
+            //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
+            if (Reload())
+                Save(true);
+        }
 
-				return true;
-			}
+        /// <summary>
+        /// Base implementation of <see cref="ISettings"/> ISettings.
+        /// </summary>
+        /// <param name="settingsSaver">Saves and loads settings.</param>
+        /// <param name="loadSettings">If <see langword="false"/>, settings remain as default values until <see cref="Reload"/> is called.</param>
+        protected SettingsBase(ISettingsSaver settingsSaver, bool loadSettings)
+        {
+            T currentSettings = (T)this;
+            _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
+            _settingsSaver = settingsSaver;
 
-			return false;
-		}
+            //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
+            if (Reload())
+                Save(true);
+        }
 
-		/// <inheritdoc/>
-		public bool CheckIsDirty()
-		{
-			return _propertyEqualityChecker.CheckIsDirty();
-		}
+        #endregion
 
-		/// <inheritdoc/>
-		public bool Save(bool forceSave = false)
-		{
-			if (forceSave || CheckIsDirty())
-			{
-				string serialization = Serialize();
-				bool isSuccessful = _settingsSaver.SaveSerialization(serialization);
 
-				if (isSuccessful)
-				{
-					_propertyEqualityChecker.UpdateSavedValues((T)this);
-					return true;
-				}
-				return false;
-			}
+        #region Private Methods
 
-			return true;
-		}
+        private static T CreateDefaultSettings()
+        {
+            return new T();
+        }
 
-		#endregion
-	}
+        private string Serialize()
+        {
+            return JsonSerializer.Serialize<T>((T)this, m_jsonSerializerOptions);
+        }
+
+        private T? Deserialize(string serialization)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(serialization)) return CreateDefaultSettings();
+                return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+
+        #region Public Methods
+
+        /// <inheritdoc/>
+        public void Reset()
+        {
+            _propertyEqualityChecker.Reset();
+        }
+
+        /// <inheritdoc/>
+        public bool Reload()
+        {
+            string? serialization = _settingsSaver.GetSavedSerialization();
+            T savedSettings;
+            if (serialization is not null)
+            {
+                savedSettings = Deserialize(serialization) ?? CreateDefaultSettings();
+                _propertyEqualityChecker.Reload(savedSettings);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool CheckIsDirty()
+        {
+            return _propertyEqualityChecker.CheckIsDirty();
+        }
+
+        /// <inheritdoc/>
+        public bool Save(bool forceSave = false)
+        {
+            if (forceSave || CheckIsDirty())
+            {
+                string serialization = Serialize();
+                bool isSuccessful = _settingsSaver.SaveSerialization(serialization);
+
+                if (isSuccessful)
+                {
+                    _propertyEqualityChecker.UpdateSavedValues((T)this);
+                    return true;
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+    }
 }
