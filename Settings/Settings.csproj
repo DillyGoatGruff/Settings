@@ -5,16 +5,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
     <Title>Settings Saver</Title>
     <Description>Contains a base class to extend onto any serializable class which handles checking if values have changed and require saving.</Description>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/DillyGoatGruff/Settings</RepositoryUrl>
     <PackageTags>Settings;Serialize;Serializing;Save</PackageTags>
     <PackageId>Settings.Saver</PackageId>
-	<Version>1.0.2</Version>
+	<Version>1.0.3</Version>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<Authors>Dylan Schweiss</Authors>
 	<Company></Company>
   </PropertyGroup>
 
+	<ItemGroup>
+		<None Include="..\README.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+	
 </Project>
