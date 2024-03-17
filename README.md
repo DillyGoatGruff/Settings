@@ -3,24 +3,24 @@
 The settings class must have a default constructor that SettingsBase can call, but this constructor should not be called directly. Instead, a constructor accepting an ISettingsSaver as a parameter should be used.
 
 ``` cs
-    internal class SettingsClass : SettingsBase<SettingsClass>
+internal class SettingsClass : SettingsBase<SettingsClass>
+{
+    public int Id { get; set; } = 1;
+
+    public string User { get; set; } = "jdoe";
+
+    public int Age { get; set; } = 33;
+
+	//Settings class must have default constructor that is called from SettingsBase.
+	//Exception will be thrown if default constructor is called directly.
+    [Obsolete("Do not use", true)]
+    public SettingsClass() { }
+
+    public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
     {
-        public int Id { get; set; } = 1;
 
-        public string User { get; set; } = "jdoe";
-
-        public int Age { get; set; } = 33;
-
-		//Settings class must have default constructor that is called from SettingsBase.
-		//Exception will be thrown if default constructor is called directly.
-        [Obsolete("Do not use", true)]
-        public SettingsClass() { }
-
-        public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
-        {
-
-        }
     }
+}
 ```
 
 The Settings.Saver library comes with two implementations of ISettingsSaver: 
@@ -30,7 +30,7 @@ The Settings.Saver library comes with two implementations of ISettingsSaver:
 	- Does not save to disk, stores saved settings in memory. Used primarily for testing.
 
 ``` cs
-            SettingsClass settings = new SettingsClass(new FileSettingsSaver(@"C:\settings.config"));
+SettingsClass settings = new SettingsClass(new FileSettingsSaver(@"C:\settings.config"));
 ```
 
 # Equality Checking
