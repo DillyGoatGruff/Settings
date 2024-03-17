@@ -41,16 +41,8 @@ namespace Settings
         /// Base implementation of <see cref="ISettings"/> ISettings.
         /// </summary>
         /// <param name="settingsSaver">Saves and loads settings.</param>
-        protected SettingsBase(ISettingsSaver settingsSaver)
-        {
-            T currentSettings = (T)this;
-            _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
-            _settingsSaver = settingsSaver;
-            
-            //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
-            if (Reload())
-                Save(true);
-        }
+        /// <remarks>Settings will be loaded using <paramref name="settingsSaver"/> automatically.</remarks>
+        protected SettingsBase(ISettingsSaver settingsSaver) : this(settingsSaver, true) { }
 
         /// <summary>
         /// Base implementation of <see cref="ISettings"/> ISettings.
@@ -64,7 +56,7 @@ namespace Settings
             _settingsSaver = settingsSaver;
 
             //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
-            if (Reload())
+            if (loadSettings && Reload())
                 Save(true);
         }
 
