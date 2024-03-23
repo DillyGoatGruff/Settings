@@ -12,13 +12,21 @@ namespace SettingsTests
 		public DateTimeOffset SavedDateTime { get; set; } = DateTimeOffset.Now;
 		public Person PrimaryUser { get; set; } = new Person() { FirstName = "Bob", Age = 33 };
 
-		[Obsolete("", true)]
-		public ComplexSettingsClass() { }
-
 		public ComplexSettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
 		{
 		}
-	}
+
+        public ComplexSettingsClass() : base(null)
+        {
+            
+        }
+
+        protected override void OnDeserialized()
+        {
+            SavedDateTime = DateTimeOffset.Now;
+			PrimaryUser = new Person() { FirstName = "Bob", Age = 33 };
+        }
+    }
 
 	public class Person
 	{

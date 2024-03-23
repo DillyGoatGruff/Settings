@@ -10,9 +10,6 @@ namespace SettingsTests
 
         public int Age { get; set; } = 33;
 
-        [Obsolete("Do not use", true)]
-        public SettingsClass() { }
-
         public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
         {
 

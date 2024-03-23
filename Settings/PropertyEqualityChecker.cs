@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Settings
 {
-	internal class PropertyEqualityChecker<T> : PropertyEqualityChecker where T : new()
+	internal class PropertyEqualityChecker<T> : PropertyEqualityChecker
 	{
 		private readonly T _settings;
 

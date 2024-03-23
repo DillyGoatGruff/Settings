@@ -13,9 +13,6 @@ namespace SettingsBenchmarking
 		public string Name { get; set; } = "Bob";
 		public int Age { get; set; } = 33;
 
-		[Obsolete]
-		public Settings() : base() { }
-
 		public Settings(ISettingsSaver settingsSaver) : base(settingsSaver)
 		{
 		}

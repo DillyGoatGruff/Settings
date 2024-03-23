@@ -11,12 +11,9 @@ namespace SettingsTests
         public int Age { get; set; } = 33;
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Obsolete("Do Not use this constructor", true)]
-        public SimpleSettings() { }
-
         public SimpleSettings(ISettingsSaver settingsSaver): base(settingsSaver)
         {
-                
+
         }
     }
 

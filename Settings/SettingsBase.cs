@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Settings
 {
-    public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>, new()
+    public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>
     {
 
         static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
@@ -29,13 +29,13 @@ namespace Settings
 
         #region Constructors
 
-        [Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
-            "This constructors should not be called directly.")]
-        protected SettingsBase()
-        {
-            _propertyEqualityChecker = default!;
-            _settingsSaver = default!;
-        }
+        //[Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
+        //    "This constructors should not be called directly.")]
+        //protected SettingsBase()
+        //{
+        //    _propertyEqualityChecker = default!;
+        //    _settingsSaver = default!;
+        //}
 
         /// <summary>
         /// Base implementation of <see cref="ISettings"/> ISettings.
@@ -67,7 +67,14 @@ namespace Settings
 
         private static T CreateDefaultSettings()
         {
-            return new T();
+            //return new T();
+#if NET5_0_OR_GREATER
+            T defaultSettings = (T)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(T));
+#else
+            T defaultSettings = return (T)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(T));
+#endif
+            defaultSettings.OnDeserialized();
+            return defaultSettings;
         }
 
         private string Serialize()
@@ -79,7 +86,9 @@ namespace Settings
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(serialization)) return CreateDefaultSettings();
+                if (string.IsNullOrWhiteSpace(serialization)) 
+                    return CreateDefaultSettings();
+                
                 return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
             }
             catch (JsonException)
@@ -141,5 +150,10 @@ namespace Settings
         }
 
         #endregion
+
+        protected virtual void OnDeserialized()
+        {
+
+        }
     }
 }
