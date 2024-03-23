@@ -16,5 +16,9 @@ namespace SettingsBenchmarking
 		public Settings(ISettingsSaver settingsSaver) : base(settingsSaver)
 		{
 		}
-	}
+
+        protected override void InitializeDefaultValues()
+        {
+        }
+    }
 }

@@ -17,7 +17,11 @@ namespace SettingsTests
 		{
 
 		}
-	}
+
+        protected override void InitializeDefaultValues()
+        {
+        }
+    }
 
 
 	public class Computer

@@ -52,6 +52,7 @@ namespace Settings
         protected SettingsBase(ISettingsSaver settingsSaver, bool loadSettings)
         {
             T currentSettings = (T)this;
+            currentSettings.InitializeDefaultValues();
             _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
             _settingsSaver = settingsSaver;
 
@@ -73,7 +74,7 @@ namespace Settings
 #else
             T defaultSettings = return (T)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(T));
 #endif
-            defaultSettings.OnDeserialized();
+            defaultSettings.InitializeDefaultValues();
             return defaultSettings;
         }
 
@@ -86,9 +87,11 @@ namespace Settings
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(serialization)) 
+                if (string.IsNullOrWhiteSpace(serialization))
                     return CreateDefaultSettings();
-                
+                T defaultSettings = CreateDefaultSettings();
+                JsonSerializerExt.PopulateObject<T>(serialization, defaultSettings);
+                return defaultSettings;
                 return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
             }
             catch (JsonException)
@@ -151,9 +154,6 @@ namespace Settings
 
         #endregion
 
-        protected virtual void OnDeserialized()
-        {
-
-        }
+        protected abstract void InitializeDefaultValues();
     }
 }

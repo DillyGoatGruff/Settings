@@ -9,8 +9,8 @@ namespace SettingsTests
 {
 	public class ComplexSettingsClass : SettingsBase<ComplexSettingsClass>
 	{
-		public DateTimeOffset SavedDateTime { get; set; } = DateTimeOffset.Now;
-		public Person PrimaryUser { get; set; } = new Person() { FirstName = "Bob", Age = 33 };
+		public DateTimeOffset SavedDateTime { get; set; }
+		public Person PrimaryUser { get; set; }
 
 		public ComplexSettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
 		{
@@ -21,9 +21,9 @@ namespace SettingsTests
             
         }
 
-        protected override void OnDeserialized()
+        protected override void InitializeDefaultValues()
         {
-            SavedDateTime = DateTimeOffset.Now;
+			SavedDateTime = new DateTimeOffset(2024, 3, 23, 13, 2, 0, TimeSpan.FromHours(-6));
 			PrimaryUser = new Person() { FirstName = "Bob", Age = 33 };
         }
     }

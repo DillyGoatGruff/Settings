@@ -14,5 +14,9 @@ namespace SettingsTests
         {
 
         }
+
+        protected override void InitializeDefaultValues()
+        {
+        }
     }
 }
