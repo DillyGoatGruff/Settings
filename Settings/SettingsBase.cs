@@ -29,14 +29,6 @@ namespace Settings
 
         #region Constructors
 
-        //[Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
-        //    "This constructors should not be called directly.")]
-        //protected SettingsBase()
-        //{
-        //    _propertyEqualityChecker = default!;
-        //    _settingsSaver = default!;
-        //}
-
         /// <summary>
         /// Base implementation of <see cref="ISettings"/> ISettings.
         /// </summary>
@@ -92,7 +84,6 @@ namespace Settings
                 T defaultSettings = CreateDefaultSettings();
                 JsonSerializerExt.PopulateObject<T>(serialization, defaultSettings);
                 return defaultSettings;
-                return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
             }
             catch (JsonException)
             {
