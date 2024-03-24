@@ -13,7 +13,7 @@ namespace Settings
         private readonly T _settings;
 
 
-        public PropertyEqualityChecker(T settings) : base(default!, settings!, settings!)
+        public PropertyEqualityChecker(T settings) : base(default!, typeof(T), settings!, settings!)
         {
             _settings = settings;
         }
@@ -60,11 +60,11 @@ namespace Settings
 
         #region Constructor
 
-        public PropertyEqualityChecker(PropertyInfo parentPropertyInfo, object obj, object defaultObj)
+        public PropertyEqualityChecker(PropertyInfo parentPropertyInfo, Type type, object obj, object defaultObj)
         {
             _parentPropertyInfo = parentPropertyInfo;
 
-            PropertyInfo[] tempPropertyInfos = obj.GetType()
+            PropertyInfo[] tempPropertyInfos = type
             .GetProperties()
             .Where(x => x.CanWrite) // Only need to monitor properties that have setters
             .ToArray();
@@ -77,9 +77,13 @@ namespace Settings
             {
                 object? savedPropertyValue = tempPropertyInfos[i].GetValue(obj);
                 object? defaultPropertyValue = tempPropertyInfos[i].GetValue(defaultObj);
-                if (tempPropertyInfos[i].PropertyType.IsClass && tempPropertyInfos[i].PropertyType != typeof(string))
+                if (savedPropertyValue is null && defaultPropertyValue is null)
                 {
-                    propertyCheckers.Add(new PropertyEqualityChecker(tempPropertyInfos[i], savedPropertyValue, defaultPropertyValue));
+                    continue;
+                }
+                else if (tempPropertyInfos[i].PropertyType.IsClass && tempPropertyInfos[i].PropertyType != typeof(string))
+                {
+                    propertyCheckers.Add(new PropertyEqualityChecker(tempPropertyInfos[i], tempPropertyInfos[i].PropertyType, savedPropertyValue, defaultPropertyValue));
                 }
                 else
                 {

@@ -1,22 +1,18 @@
 ﻿using FluentAssertions;
 using Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SettingsTests.ReferenceType.SettingsClasses;
 using Xunit;
 
-namespace SettingsTests
+namespace SettingsTests.ReferenceType.Tests
 {
-	public class ReferenceTypeSettingsTests
+    public class ReferenceTests2
 	{
 
 		[Fact]
 		public void SaveTest()
 		{
 			//Arrange
-			ComplexSettingsClass settings = new ComplexSettingsClass(new InMemorySettingsSaver());
+			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
 			settings.PrimaryUser.FirstName = "Joe";
@@ -30,7 +26,7 @@ namespace SettingsTests
 		public void ReloadTest()
 		{
 			//Arrange
-			ComplexSettingsClass settings = new ComplexSettingsClass(new InMemorySettingsSaver());
+			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
 			settings.PrimaryUser.FirstName = "Joe";
@@ -44,7 +40,7 @@ namespace SettingsTests
 		public void ResetTest()
 		{
 			//Arrange
-			ComplexSettingsClass settings = new ComplexSettingsClass(new InMemorySettingsSaver());
+			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
 			settings.PrimaryUser.FirstName = "Joe";
@@ -58,7 +54,7 @@ namespace SettingsTests
 		public void IsDirtyTest_DifferentSubParameters()
 		{
 			//Arrange
-			ComplexSettingsClass settings = new ComplexSettingsClass(new InMemorySettingsSaver());
+			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
 			settings.PrimaryUser.FirstName = "Joe";
@@ -71,10 +67,10 @@ namespace SettingsTests
 		public void IsDirtyTest_DifferentObjectSameParameters()
 		{
 			//Arrange
-			ComplexSettingsClass settings = new ComplexSettingsClass(new InMemorySettingsSaver());
+			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
-			settings.PrimaryUser = new Person()
+			settings.PrimaryUser = new ReferenceTypeClass2.Person()
 			{
 				FirstName = settings.PrimaryUser.FirstName,
 				Age = settings.PrimaryUser.Age
