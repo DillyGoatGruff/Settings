@@ -146,6 +146,15 @@ namespace Settings
                 else
                 {
                     object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
+
+                    if(value is null)
+                    {
+                        //Current value is null but default property is NOT null so need to instantiate a new instance so the default values can be set.
+                        
+                        //Class must have default constructor
+                        value = Activator.CreateInstance(propertyEqualityChecker._parentPropertyInfo.PropertyType)!;
+                        propertyEqualityChecker.SetPropertyValue(currentSettings, value);
+                    }
                     propertyEqualityChecker.Reset(value);
                 }
             }
