@@ -25,7 +25,7 @@ namespace Settings
 
         public void Reload(T settings)
         {
-            base.Reload(_settings, settings);
+            base.Reload(_settings!, settings!);
         }
 
         public void UpdateSavedValues(T settings)
@@ -59,10 +59,13 @@ namespace Settings
         #endregion
 
         #region Constructor
-
+        private readonly bool _isParentDefaultPropertyNull;
+        private bool _isParentSavedPropertyNull;
         public PropertyEqualityChecker(PropertyInfo parentPropertyInfo, Type type, object obj, object defaultObj)
         {
             _parentPropertyInfo = parentPropertyInfo;
+            _isParentDefaultPropertyNull = defaultObj is null;
+            _isParentSavedPropertyNull = obj is null;
 
             PropertyInfo[] tempPropertyInfos = type
             .GetProperties()
@@ -75,13 +78,11 @@ namespace Settings
 
             for (int i = 0; i < tempPropertyInfos.Length; i++)
             {
-                object? savedPropertyValue = tempPropertyInfos[i].GetValue(obj);
-                object? defaultPropertyValue = tempPropertyInfos[i].GetValue(defaultObj);
-                if (savedPropertyValue is null && defaultPropertyValue is null)
-                {
-                    continue;
-                }
-                else if (tempPropertyInfos[i].PropertyType.IsClass && tempPropertyInfos[i].PropertyType != typeof(string))
+                //TODO: upon creation, saved values should always be identical to the default values so this should be able to reuse same value as default.
+                object? defaultPropertyValue = (obj is not null) ? tempPropertyInfos[i].GetValue(defaultObj) : null;
+                object? savedPropertyValue = (obj is not null) ? tempPropertyInfos[i].GetValue(obj) : null;
+
+                if (tempPropertyInfos[i].PropertyType.IsClass && tempPropertyInfos[i].PropertyType != typeof(string))
                 {
                     propertyCheckers.Add(new PropertyEqualityChecker(tempPropertyInfos[i], tempPropertyInfos[i].PropertyType, savedPropertyValue, defaultPropertyValue));
                 }
@@ -135,8 +136,13 @@ namespace Settings
             for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
-                object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
-                propertyEqualityChecker.Reset(value);
+                if (propertyEqualityChecker._isParentDefaultPropertyNull)
+                    propertyEqualityChecker._parentPropertyInfo.SetValue(currentSettings, null);
+                else
+                {
+                    object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
+                    propertyEqualityChecker.Reset(value);
+                }
             }
         }
 
@@ -147,6 +153,8 @@ namespace Settings
         /// <param name="newSettings">The new settings to update values to.</param>
         internal void Reload(object currentSettings, object newSettings)
         {
+            if (_isParentSavedPropertyNull) return;
+
             for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
             {
                 PropertyInfo propertyInfo = _savedPropertyInfoValues[i].PropertyInfo;
@@ -159,6 +167,12 @@ namespace Settings
             for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
+                if (propertyEqualityChecker._isParentSavedPropertyNull)
+                {
+                    propertyEqualityChecker._parentPropertyInfo.SetValue(currentSettings, null);
+                    continue;
+                }
+
                 object? currentValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
                 object? newValue = propertyEqualityChecker.GetPropertyValue(newSettings);
                 if (newValue is null && currentValue is not null)
@@ -181,6 +195,9 @@ namespace Settings
 
         internal void UpdateSavedValues(object currentSettings)
         {
+            if (_isParentSavedPropertyNull && currentSettings is null)
+                return;
+
             for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
             {
                 object? value = _savedPropertyInfoValues[i].PropertyInfo.GetValue(currentSettings);
@@ -212,10 +229,11 @@ namespace Settings
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
                 object? savedValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
-                if (propertyEqualityChecker.CheckIsDirty(savedValue))
-                {
+
+                if (savedValue is null && propertyEqualityChecker._isParentSavedPropertyNull)
+                    continue;
+                else if (propertyEqualityChecker.CheckIsDirty(savedValue))
                     return true;
-                }
             }
 
             return false;
