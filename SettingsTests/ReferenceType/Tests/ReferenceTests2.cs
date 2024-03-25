@@ -26,7 +26,7 @@ namespace SettingsTests.ReferenceType.Tests
         public void SavePropertyAsNull()
         {
             //Arrange
-            ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+            ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
             //Act
             settings.PrimaryUser = null;
@@ -54,7 +54,7 @@ namespace SettingsTests.ReferenceType.Tests
         public void ReloadPropertyAsNull()
         {
             //Arrange
-            ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+            ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
             //Act
             settings.PrimaryUser = null;

@@ -54,7 +54,21 @@ namespace SettingsTests.ReferenceType.Tests
 			settings.PrimaryUser!.FirstName.Should().Be(originalFirstName);
 		}
 
-		[Fact]
+        [Fact]
+        public void ReloadPropertyAsNull()
+        {
+            //Arrange
+            ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = null;
+            settings.Reload();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
 		public void ResetTest()
 		{
 			//Arrange
