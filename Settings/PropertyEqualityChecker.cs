@@ -186,6 +186,14 @@ namespace Settings
                     newValue = Activator.CreateInstance(currentValue.GetType());    //Class must have default constructor
                     propertyEqualityChecker.LoadDefaultValues(newValue);
                     propertyEqualityChecker.SetPropertyValue(newSettings, newValue);
+                    continue;
+                }
+                else if (newValue is not null && currentValue is null)
+                {
+                    //New value is not null, need to instantiate the current value so properties can be set
+                    //Class must have default constructor
+                    currentValue = Activator.CreateInstance(propertyEqualityChecker._parentPropertyInfo.PropertyType);
+                    propertyEqualityChecker.SetPropertyValue(currentSettings, currentValue);
                 }
                 propertyEqualityChecker.Reload(currentValue, newValue);
             }
@@ -201,9 +209,6 @@ namespace Settings
 
         internal void UpdateSavedValues(object currentSettings)
         {
-            if (_isParentSavedPropertyNull && currentSettings is null)
-                return;
-
             for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
             {
                 object? value = _savedPropertyInfoValues[i].PropertyInfo.GetValue(currentSettings);
@@ -214,7 +219,10 @@ namespace Settings
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
                 object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
-                propertyEqualityChecker.UpdateSavedValues(value);
+                propertyEqualityChecker._isParentSavedPropertyNull = value is null;
+
+                if(value is not null)
+                    propertyEqualityChecker.UpdateSavedValues(value);
             }
         }
 
@@ -241,7 +249,7 @@ namespace Settings
                     if (propertyEqualityChecker._isParentSavedPropertyNull)
                         continue;
                     else if (!propertyEqualityChecker._isParentSavedPropertyNull)
-                        return false;
+                        return true;
                 }
                 else if (propertyEqualityChecker.CheckIsDirty(currentValue))
                     return true;

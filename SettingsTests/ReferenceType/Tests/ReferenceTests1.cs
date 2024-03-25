@@ -14,13 +14,14 @@ namespace SettingsTests.ReferenceType.Tests
 			//Arrange
 			ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
 
-			//Act
-			settings.PrimaryUser!.FirstName = "Joe";
+            //Act
+            settings.PrimaryUser!.FirstName = "Joe";
 			settings.Save();
 
 			//Assert
 			settings.CheckIsDirty().Should().BeFalse();
-		}
+            settings.PrimaryUser!.FirstName.Should().Be("Joe");
+        }
 
         [Fact]
         public void SavePropertyAsNull()
@@ -34,6 +35,7 @@ namespace SettingsTests.ReferenceType.Tests
 
             //Assert
             settings.CheckIsDirty().Should().BeFalse();
+			settings.PrimaryUser.Should().BeNull();
         }
 
         [Fact]
@@ -41,6 +43,7 @@ namespace SettingsTests.ReferenceType.Tests
 		{
 			//Arrange
 			ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+			string originalFirstName = settings.PrimaryUser!.FirstName;
 
 			//Act
 			settings.PrimaryUser!.FirstName = "Joe";
@@ -48,6 +51,7 @@ namespace SettingsTests.ReferenceType.Tests
 
 			//Assert
 			settings.CheckIsDirty().Should().BeFalse();
+			settings.PrimaryUser!.FirstName.Should().Be(originalFirstName);
 		}
 
 		[Fact]
@@ -55,16 +59,19 @@ namespace SettingsTests.ReferenceType.Tests
 		{
 			//Arrange
 			ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+            string originalFirstName = settings.PrimaryUser!.FirstName;
 
-			//Act
-			settings.PrimaryUser!.FirstName = "Joe";
+            //Act
+            settings.PrimaryUser!.FirstName = "Joe";
 			settings.Reset();
 
 			//Assert
 			settings.CheckIsDirty().Should().BeFalse();
-		}
+            settings.PrimaryUser!.FirstName.Should().Be(originalFirstName);
 
-		[Fact]
+        }
+
+        [Fact]
 		public void IsDirtyTest_DifferentSubParameters()
 		{
 			//Arrange
