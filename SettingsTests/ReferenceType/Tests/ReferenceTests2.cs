@@ -15,21 +15,35 @@ namespace SettingsTests.ReferenceType.Tests
 			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
-			settings.PrimaryUser.FirstName = "Joe";
+			settings.PrimaryUser!.FirstName = "Joe";
 			settings.Save();
 
 			//Assert
 			settings.CheckIsDirty().Should().BeFalse();
 		}
 
-		[Fact]
+        [Fact]
+        public void SavePropertyAsNull()
+        {
+            //Arrange
+            ReferenceTypeClass1 settings = new ReferenceTypeClass1(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = null;
+            settings.Save();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
 		public void ReloadTest()
 		{
 			//Arrange
 			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
-			settings.PrimaryUser.FirstName = "Joe";
+			settings.PrimaryUser!.FirstName = "Joe";
 			settings.Reload();
 
 			//Assert
@@ -43,7 +57,7 @@ namespace SettingsTests.ReferenceType.Tests
 			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
-			settings.PrimaryUser.FirstName = "Joe";
+			settings.PrimaryUser!.FirstName = "Joe";
 			settings.Reset();
 
 			//Assert
@@ -57,7 +71,7 @@ namespace SettingsTests.ReferenceType.Tests
 			ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
 
 			//Act
-			settings.PrimaryUser.FirstName = "Joe";
+			settings.PrimaryUser!.FirstName = "Joe";
 
 			//Assert
 			settings.CheckIsDirty().Should().BeTrue();
@@ -72,7 +86,7 @@ namespace SettingsTests.ReferenceType.Tests
 			//Act
 			settings.PrimaryUser = new ReferenceTypeClass2.Person()
 			{
-				FirstName = settings.PrimaryUser.FirstName,
+				FirstName = settings.PrimaryUser!.FirstName,
 				Age = settings.PrimaryUser.Age
 			};
 

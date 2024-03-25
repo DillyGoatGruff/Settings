@@ -236,8 +236,13 @@ namespace Settings
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
                 object? currentValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
 
-                if (currentValue is null && propertyEqualityChecker._isParentSavedPropertyNull)
-                    continue;
+                if (currentValue is null)
+                {
+                    if (propertyEqualityChecker._isParentSavedPropertyNull)
+                        continue;
+                    else if (!propertyEqualityChecker._isParentSavedPropertyNull)
+                        return false;
+                }
                 else if (propertyEqualityChecker.CheckIsDirty(currentValue))
                     return true;
             }

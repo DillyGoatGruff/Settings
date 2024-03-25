@@ -13,7 +13,7 @@ namespace SettingsTests.ReferenceType.SettingsClasses
     internal class ReferenceTypeClass3 : SettingsBase<ReferenceTypeClass3>
     {
         public DateTimeOffset SavedDateTime { get; set; }
-        public Person PrimaryUser { get; set; }
+        public Person? PrimaryUser { get; set; }
 
         public ReferenceTypeClass3(ISettingsSaver settingsSaver) : base(settingsSaver)
         {

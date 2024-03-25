@@ -14,7 +14,7 @@ namespace SettingsTests.ReferenceType.SettingsClasses
     {
         public DateTimeOffset SavedDateTime { get; set; }
 
-        public Person PrimaryUser { get; set; } = new Person() { FirstName = "Bob", Age = 33 };
+        public Person? PrimaryUser { get; set; } = new Person() { FirstName = "Bob", Age = 33 };
 
         public ReferenceTypeClass2(ISettingsSaver settingsSaver) : base(settingsSaver)
         {
