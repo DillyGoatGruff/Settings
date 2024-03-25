@@ -117,6 +117,11 @@ namespace Settings
             return _parentPropertyInfo.GetValue(parent);
         }
 
+        private void SetPropertyValue(object parent, object? value)
+        {
+            _parentPropertyInfo.SetValue(parent, value);
+        }
+
         #endregion
 
         #region Public Methods
@@ -137,7 +142,7 @@ namespace Settings
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
                 if (propertyEqualityChecker._isParentDefaultPropertyNull)
-                    propertyEqualityChecker._parentPropertyInfo.SetValue(currentSettings, null);
+                    propertyEqualityChecker.SetPropertyValue(currentSettings, null);
                 else
                 {
                     object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
@@ -153,7 +158,8 @@ namespace Settings
         /// <param name="newSettings">The new settings to update values to.</param>
         internal void Reload(object currentSettings, object newSettings)
         {
-            if (_isParentSavedPropertyNull) return;
+            if (_isParentSavedPropertyNull)
+                return;
 
             for (int i = 0; i < _savedPropertyInfoValues.Length; i++)
             {
@@ -169,7 +175,7 @@ namespace Settings
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
                 if (propertyEqualityChecker._isParentSavedPropertyNull)
                 {
-                    propertyEqualityChecker._parentPropertyInfo.SetValue(currentSettings, null);
+                    propertyEqualityChecker.SetPropertyValue(currentSettings, null);
                     continue;
                 }
 
@@ -179,7 +185,7 @@ namespace Settings
                 {
                     newValue = Activator.CreateInstance(currentValue.GetType());    //Class must have default constructor
                     propertyEqualityChecker.LoadDefaultValues(newValue);
-                    propertyEqualityChecker._parentPropertyInfo.SetValue(newSettings, newValue);
+                    propertyEqualityChecker.SetPropertyValue(newSettings, newValue);
                 }
                 propertyEqualityChecker.Reload(currentValue, newValue);
             }
@@ -228,11 +234,11 @@ namespace Settings
             for (int i = 0; i < _subClassPropertyEqualityCheckers.Length; i++)
             {
                 PropertyEqualityChecker propertyEqualityChecker = _subClassPropertyEqualityCheckers[i];
-                object? savedValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
+                object? currentValue = propertyEqualityChecker.GetPropertyValue(currentSettings);
 
-                if (savedValue is null && propertyEqualityChecker._isParentSavedPropertyNull)
+                if (currentValue is null && propertyEqualityChecker._isParentSavedPropertyNull)
                     continue;
-                else if (propertyEqualityChecker.CheckIsDirty(savedValue))
+                else if (propertyEqualityChecker.CheckIsDirty(currentValue))
                     return true;
             }
 
