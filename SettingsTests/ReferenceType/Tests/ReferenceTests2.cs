@@ -78,7 +78,21 @@ namespace SettingsTests.ReferenceType.Tests
 			settings.CheckIsDirty().Should().BeFalse();
 		}
 
-		[Fact]
+        [Fact]
+        public void ResetPropertyAsNull()
+        {
+            //Arrange
+            ReferenceTypeClass2 settings = new ReferenceTypeClass2(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = null;
+            settings.Reset();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
 		public void IsDirtyTest_DifferentSubParameters()
 		{
 			//Arrange
