@@ -48,9 +48,12 @@ namespace Settings
         #region Fields
 
         private readonly PropertyInfo _parentPropertyInfo;
+        private readonly Type _type;
         private readonly PropertyInfoValue[] _defaultPropertyInfoValues;
         private readonly PropertyInfoValue[] _savedPropertyInfoValues;
         private readonly PropertyEqualityChecker[] _subClassPropertyEqualityCheckers;
+        private readonly bool _isParentDefaultPropertyNull;
+        private bool _isParentSavedPropertyNull;
 
         #endregion
 
@@ -59,11 +62,11 @@ namespace Settings
         #endregion
 
         #region Constructor
-        private readonly bool _isParentDefaultPropertyNull;
-        private bool _isParentSavedPropertyNull;
+
         public PropertyEqualityChecker(PropertyInfo parentPropertyInfo, Type type, object obj, object defaultObj)
         {
             _parentPropertyInfo = parentPropertyInfo;
+            _type = type;
             _isParentDefaultPropertyNull = defaultObj is null;
             _isParentSavedPropertyNull = obj is null;
 
@@ -122,6 +125,17 @@ namespace Settings
             _parentPropertyInfo.SetValue(parent, value);
         }
 
+        /// <summary>
+        /// Creates an instance of the type the property equality checker monitors.
+        /// </summary>
+        /// <returns>The instance of <see cref="_type"/></returns>
+        private object CreateInstance()
+        {
+            //Requires the type to have a default constructor
+            object obj =  Activator.CreateInstance(_type)!;
+            return obj;
+        }
+
         #endregion
 
         #region Public Methods
@@ -150,9 +164,7 @@ namespace Settings
                     if(value is null)
                     {
                         //Current value is null but default property is NOT null so need to instantiate a new instance so the default values can be set.
-                        
-                        //Class must have default constructor
-                        value = Activator.CreateInstance(propertyEqualityChecker._parentPropertyInfo.PropertyType)!;
+                        value = propertyEqualityChecker.CreateInstance();
                         propertyEqualityChecker.SetPropertyValue(currentSettings, value);
                     }
                     propertyEqualityChecker.Reset(value);
@@ -192,7 +204,7 @@ namespace Settings
                 object? newValue = propertyEqualityChecker.GetPropertyValue(newSettings);
                 if (newValue is null && currentValue is not null)
                 {
-                    newValue = Activator.CreateInstance(currentValue.GetType());    //Class must have default constructor
+                    newValue = propertyEqualityChecker.CreateInstance();
                     propertyEqualityChecker.LoadDefaultValues(newValue);
                     propertyEqualityChecker.SetPropertyValue(newSettings, newValue);
                     continue;
@@ -200,8 +212,7 @@ namespace Settings
                 else if (newValue is not null && currentValue is null)
                 {
                     //New value is not null, need to instantiate the current value so properties can be set
-                    //Class must have default constructor
-                    currentValue = Activator.CreateInstance(propertyEqualityChecker._parentPropertyInfo.PropertyType);
+                    currentValue = propertyEqualityChecker.CreateInstance();
                     propertyEqualityChecker.SetPropertyValue(currentSettings, currentValue);
                 }
                 propertyEqualityChecker.Reload(currentValue, newValue);
