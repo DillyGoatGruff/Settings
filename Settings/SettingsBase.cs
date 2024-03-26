@@ -3,8 +3,13 @@ using System.Text.Json;
 
 namespace Settings
 {
+    /// <summary>
+    /// The base class for the settings class to inherit from.
+    /// </summary>
+    /// <typeparam name="T">The settings class to save and load.</typeparam>
     public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>
     {
+        public static readonly string c_defaultFilename;
 
         static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
         {
@@ -29,15 +34,36 @@ namespace Settings
 
         #region Constructors
 
+        static SettingsBase()
+        {
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string assemblyDirectory = Path.GetDirectoryName(assemblyPath)!;
+            string configFilename = Path.Combine(assemblyDirectory!, $"{AppDomain.CurrentDomain.FriendlyName}.cfg");
+            c_defaultFilename = configFilename;
+        }
+
         /// <summary>
-        /// Base implementation of <see cref="ISettings"/> ISettings.
+        /// Base implementation of <see cref="ISettings"/>.
+        /// </summary>
+        /// <remarks>A <see cref="FileSettingsSaver"/> is used to save/load settings. File is saved with a .cfg extension in same directory as executable.</remarks>
+        protected SettingsBase() : this(new FileSettingsSaver(c_defaultFilename)) { }
+
+        /// <summary>
+        /// Base implementation of <see cref="ISettings"/>.
+        /// </summary>
+        /// <param name="filename">The name, including the path, of the file used to save and load serialized data.</param>
+        /// <remarks>A <see cref="FileSettingsSaver"/> is used as the <see cref="ISettingsSaver"/>.</remarks>
+        protected SettingsBase(string filename) : this(new FileSettingsSaver(filename)) { }
+
+        /// <summary>
+        /// Base implementation of <see cref="ISettings"/>.
         /// </summary>
         /// <param name="settingsSaver">Saves and loads settings.</param>
         /// <remarks>Settings will be loaded using <paramref name="settingsSaver"/> automatically.</remarks>
         protected SettingsBase(ISettingsSaver settingsSaver) : this(settingsSaver, true) { }
 
         /// <summary>
-        /// Base implementation of <see cref="ISettings"/> ISettings.
+        /// Base implementation of <see cref="ISettings"/>.
         /// </summary>
         /// <param name="settingsSaver">Saves and loads settings.</param>
         /// <param name="loadSettings">If <see langword="false"/>, settings remain as default values until <see cref="Reload"/> is called.</param>
@@ -145,6 +171,10 @@ namespace Settings
 
         #endregion
 
+        /// <summary>
+        /// Method called to set default values for properties.
+        /// </summary>
+        /// <remarks>Default values have to be set either directly on the properties/backing field or in this method - any value set in the constructor will not be used as the default value.</remarks>
         protected abstract void InitializeDefaultValues();
     }
 }
