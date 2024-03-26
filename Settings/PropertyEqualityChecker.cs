@@ -12,8 +12,11 @@ namespace Settings
     {
         private readonly T _settings;
 
-
-        public PropertyEqualityChecker(T settings) : base(default!, typeof(T), settings!, settings!)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings">The class to monitor for equality.</param>
+        public PropertyEqualityChecker(T settings) : base(default!, settings!, settings!)
         {
             _settings = settings;
         }
@@ -48,7 +51,6 @@ namespace Settings
         #region Fields
 
         private readonly PropertyInfo _parentPropertyInfo;
-        private readonly Type _type;
         private readonly PropertyInfoValue[] _defaultPropertyInfoValues;
         private readonly PropertyInfoValue[] _savedPropertyInfoValues;
         private readonly PropertyEqualityChecker[] _subClassPropertyEqualityCheckers;
@@ -63,13 +65,25 @@ namespace Settings
 
         #region Constructor
 
-        public PropertyEqualityChecker(PropertyInfo parentPropertyInfo, Type type, object obj, object defaultObj)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parentPropertyInfo">PropertyInfo for parent class's property that is being monitored.</param>
+        /// <param name="obj">The saved (and current) value of the property.</param>
+        /// <param name="defaultObj">The default value of the property.</param>
+        public PropertyEqualityChecker(PropertyInfo? parentPropertyInfo, object? obj, object? defaultObj)
         {
-            _parentPropertyInfo = parentPropertyInfo;
-            _type = type;
+            // PropertyInfo should only be null for the root settings class, because it has no parent class.
+            // _parentPropertyInfo should not be access anywhere in the code if PropertyEqualityChecker is for
+            // the root settings class so it is being saved in a non-nullable object.
+            _parentPropertyInfo = parentPropertyInfo!; 
+
+            //TODO: upon construction, obj and defaultObj should be the same value; allowing the constructor to be simplified to only pass in one object.
             _isParentDefaultPropertyNull = defaultObj is null;
             _isParentSavedPropertyNull = obj is null;
 
+            //if parentPropertyInfo is null, the it is the root settings class and we can guarantee obj is not null.
+            Type type = (parentPropertyInfo is not null) ? parentPropertyInfo.PropertyType : obj!.GetType();
             PropertyInfo[] tempPropertyInfos = type
             .GetProperties()
             .Where(x => x.CanWrite) // Only need to monitor properties that have setters
@@ -87,7 +101,7 @@ namespace Settings
 
                 if (tempPropertyInfos[i].PropertyType.IsClass && tempPropertyInfos[i].PropertyType != typeof(string))
                 {
-                    propertyCheckers.Add(new PropertyEqualityChecker(tempPropertyInfos[i], tempPropertyInfos[i].PropertyType, savedPropertyValue, defaultPropertyValue));
+                    propertyCheckers.Add(new PropertyEqualityChecker(tempPropertyInfos[i], savedPropertyValue, defaultPropertyValue));
                 }
                 else
                 {
@@ -132,7 +146,7 @@ namespace Settings
         private object CreateInstance()
         {
             //Requires the type to have a default constructor
-            object obj =  Activator.CreateInstance(_type)!;
+            object obj =  Activator.CreateInstance(_parentPropertyInfo.PropertyType)!;
             return obj;
         }
 
