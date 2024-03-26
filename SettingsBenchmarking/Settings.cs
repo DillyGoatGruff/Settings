@@ -13,7 +13,7 @@ namespace SettingsBenchmarking
         public string Name { get; set; } = "Bob";
         public int Age { get; set; } = 33;
 
-        public Persion Person { get; set; }
+        public Person Person { get; set; }
 
 
         public Settings(ISettingsSaver settingsSaver) : base(settingsSaver)
@@ -22,16 +22,16 @@ namespace SettingsBenchmarking
 
         protected override void InitializeDefaultValues()
         {
-            Person = new Persion() { ID = Guid.NewGuid(), Name = "HI" };
+            Person = new Person() { ID = Guid.NewGuid(), Name = "HI" };
         }
     }
 
-    public class Persion
+    public class Person
     {
         public Guid ID { get; set; }
         public string Name { get; set; }
 
-        public Persion()
+        public Person()
         {
             
         }
