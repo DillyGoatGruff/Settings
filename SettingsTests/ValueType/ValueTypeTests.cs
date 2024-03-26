@@ -2,7 +2,7 @@
 using Settings;
 using Xunit;
 
-namespace SettingsTests
+namespace SettingsTests.ValueType
 {
 
     internal class SimpleSettings : SettingsBase<SimpleSettings>
@@ -11,18 +11,18 @@ namespace SettingsTests
         public int Age { get; set; } = 33;
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public SimpleSettings(ISettingsSaver settingsSaver): base(settingsSaver)
+        public SimpleSettings(ISettingsSaver settingsSaver) : base(settingsSaver)
         {
 
         }
 
         protected override void InitializeDefaultValues()
         {
-            
+
         }
     }
 
-    public class ValueTypeSettingsTests
+    public class ValueTypeTests
     {
 
         [Fact]

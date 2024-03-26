@@ -1,6 +1,6 @@
 ﻿using Settings;
 
-namespace SettingsTests
+namespace SettingsTests.ValueType
 {
     internal class SettingsClass : SettingsBase<SettingsClass>
     {
