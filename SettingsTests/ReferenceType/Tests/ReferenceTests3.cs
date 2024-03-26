@@ -23,6 +23,20 @@ namespace SettingsTests.ReferenceType.Tests
         }
 
         [Fact]
+        public void SavePropertyAsNotNull()
+        {
+            //Arrange
+            ReferenceTypeClass3 settings = new ReferenceTypeClass3(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = new ReferenceTypeClass3.Person() { FirstName = "Bob", Age = 33 };
+            settings.Save();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
         public void ReloadTest()
         {
             //Arrange
@@ -37,6 +51,20 @@ namespace SettingsTests.ReferenceType.Tests
         }
 
         [Fact]
+        public void ReloadPropertyAsNotNull()
+        {
+            //Arrange
+            ReferenceTypeClass3 settings = new ReferenceTypeClass3(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = new ReferenceTypeClass3.Person() { FirstName = "Bob", Age = 33 };
+            settings.Reload();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
         public void ResetTest()
         {
             //Arrange
@@ -44,6 +72,20 @@ namespace SettingsTests.ReferenceType.Tests
 
             //Act
             settings.PrimaryUser = new ReferenceTypeClass3.Person();
+            settings.Reset();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+        }
+
+        [Fact]
+        public void ResetPropertyAsNotNull()
+        {
+            //Arrange
+            ReferenceTypeClass3 settings = new ReferenceTypeClass3(new InMemorySettingsSaver());
+
+            //Act
+            settings.PrimaryUser = new ReferenceTypeClass3.Person() { FirstName = "Bob", Age = 33 };
             settings.Reset();
 
             //Assert
