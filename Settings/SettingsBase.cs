@@ -66,7 +66,10 @@ namespace Settings
         /// Base implementation of <see cref="ISettings"/>.
         /// </summary>
         /// <param name="settingsSaver">Saves and loads settings.</param>
-        /// <param name="loadSettings">If <see langword="false"/>, settings remain as default values until <see cref="Reload"/> is called.</param>
+        /// <param name="loadSettings">
+        /// If <see langword="false"/>, settings remain as default values until <see cref="Reload"/> is called.
+        /// If <see langword="true", settings will be saved  if never saved before (even if values are curently the default values).
+        /// </param>
         protected SettingsBase(ISettingsSaver settingsSaver, bool loadSettings)
         {
             T currentSettings = (T)this;
@@ -75,7 +78,7 @@ namespace Settings
             _settingsSaver = settingsSaver;
 
             //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
-            if (loadSettings && Reload())
+            if (loadSettings && !Reload())
                 Save(true);
         }
 
