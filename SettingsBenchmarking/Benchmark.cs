@@ -24,7 +24,14 @@ namespace SettingsBenchmarking
 			};
 		}
 
-		[Benchmark]
+        [Benchmark]
+        public Person? Instantiation()
+        {
+            var settings = new Settings(new InMemorySettingsSaver());
+			return settings.Person;
+        }
+
+        [Benchmark]
 		public bool CheckIsDirty()
 		{
 			return _settings.CheckIsDirty();
