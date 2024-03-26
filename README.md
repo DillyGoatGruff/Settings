@@ -1,43 +1,71 @@
+# 2.0 Breaking Changes
+- Classes inheriting `SettingsBase<T>` no loner require a default constructor
+- Default values cannot be set in the constructor
+	- Default values must either be in-line assignments to properties or assigned in the `InitializeDefaultValues()`
+- Default constructors are no longer required for the settings class
+	- Default constructor of `SettingsBase<T>` uses a `FileSettingsSaver` that saves in the same directory as the assembly it is being executed in and a filename the same as the executable, but with a `.cfg` extension
+	- Any classes contained within the settings class that is inheriting `SettingsBase<T>` must still have a default constructor
+
 # Example
-
-The settings class must have a default constructor that SettingsBase can call, but this constructor should not be called directly. Instead, a constructor accepting an ISettingsSaver as a parameter should be used.
-
+Default values must be assign inline (like shown below for the `Age` property) or within the `InitializeDefaultValues()` method. In the below example the default values would be:
+- Age = 33
+- FirstName = "Joe"
+- LastName = `null`
+Because values are being set in the constructor, a call to `IsDirtyCheck()` would return `true` because the default value for Age is 33, but after instantiating the ExampleClass object, Age would be 45 (similarly, LastName would be "Doe" and not the default value of `null`).
 ``` cs
-internal class SettingsClass : SettingsBase<SettingsClass>
+internal class ExampleClass : SettingsBase<ExampleClass>
 {
-    public int Id { get; set; } = 1;
+	public int Age { get; set; } = 33;
 
-    public string User { get; set; } = "jdoe";
+	public string FirstName { get; set; }
+	public string? LastName { get; set; }
 
-    public int Age { get; set; } = 33;
+	public ExampleClass()
+	{
+		Age = 45;
+		LastName = "Doe";
+	}
 
-	//Settings class must have default constructor that is called from SettingsBase.
-	//Exception will be thrown if default constructor is called directly.
-    [Obsolete("Do not use", true)]
-    public SettingsClass() { }
+	public override void InitializeDefaultValues()
+	{
+		FirstName = "Joe";
+	}
+}		 
 
-    public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
-    {
-
-    }
-}
 ```
 
 The Settings.Saver library comes with two implementations of ISettingsSaver: 
 1) FileSettingsSaver
-	- Saves files to a file.
+	- Saves settings to a file.
 2) InMemorySettingsSaver
 	- Does not save to disk, stores saved settings in memory. Used primarily for testing.
 
 ``` cs
-SettingsClass settings = new SettingsClass(new FileSettingsSaver(@"C:\settings.config"));
+SimpleSettings settings = new SimpleClass(new FileSettingsSaver(@"C:\settings.cfg"));
+
+
+
+
+internal class SimpleSettings : SettingsBase<SimpleSettings>
+{
+	public int Age { get; set; } = 33;
+
+	public SimpleSettings(ISettingsSaver settingsSaver) : base(settingsSaver)
+	{
+	}
+
+	public override void InitializeDefaultValues()
+	{
+		
+	}
+}		 
 ```
 
 # Equality Checking
 
-Calling Save() will call CheckIsDirty() and only performs a save operation if one or more of the properties have changed.
+Calling Save() will call `CheckIsDirty()` and only performs a save operation if one or more of the properties have changed.
 
-CheckIsDirty evaluates changes by value-type, not reference type. If the settings class contains an object, it will check whether the value-types within that object have changed. It also supports objects within objects for property evaluation.
+`CheckIsDirty()` evaluates changes by value-type, not reference type. If the settings class contains an object, it will check whether the value-types within that object have changed. It also supports objects within objects for property evaluation.
 
 ``` cs
 internal class Address
@@ -75,10 +103,12 @@ internal class SettingsClass : SettingsBase<SettingsClass>
 {
 	public User TheUser { get; set; } = new User();
 
-	[Obsolete("Do not use", true)]
-	public SettingsClass() { }
-
 	public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
+	{
+
+	}
+	
+	public override void InitializeDefaultValues()
 	{
 
 	}
