@@ -13,14 +13,15 @@ namespace SettingsTests
 		public List<Computer> Computers { get; set; } = new List<Computer>();
 
 
-		[Obsolete("Only used for serialization", true)]
-		public CollectionsContainingClass() { }
-
 		public CollectionsContainingClass(ISettingsSaver settingsSaver) : base(settingsSaver)
 		{
 
 		}
-	}
+
+        protected override void InitializeDefaultValues()
+        {
+        }
+    }
 
 
 	public class Computer

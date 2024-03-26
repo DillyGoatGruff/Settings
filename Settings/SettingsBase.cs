@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Settings
 {
-    public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>, new()
+    public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>
     {
 
         static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
@@ -29,14 +29,6 @@ namespace Settings
 
         #region Constructors
 
-        [Obsolete("This constructor should only be called from a default constructor within the inherited class. " +
-            "This constructors should not be called directly.")]
-        protected SettingsBase()
-        {
-            _propertyEqualityChecker = default!;
-            _settingsSaver = default!;
-        }
-
         /// <summary>
         /// Base implementation of <see cref="ISettings"/> ISettings.
         /// </summary>
@@ -52,6 +44,7 @@ namespace Settings
         protected SettingsBase(ISettingsSaver settingsSaver, bool loadSettings)
         {
             T currentSettings = (T)this;
+            currentSettings.InitializeDefaultValues();
             _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
             _settingsSaver = settingsSaver;
 
@@ -67,7 +60,14 @@ namespace Settings
 
         private static T CreateDefaultSettings()
         {
-            return new T();
+            //return new T();
+#if NET5_0_OR_GREATER
+            T defaultSettings = (T)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(T));
+#else
+            T defaultSettings = return (T)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(T));
+#endif
+            defaultSettings.InitializeDefaultValues();
+            return defaultSettings;
         }
 
         private string Serialize()
@@ -79,8 +79,11 @@ namespace Settings
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(serialization)) return CreateDefaultSettings();
-                return JsonSerializer.Deserialize<T>(serialization, m_jsonSerializerOptions);
+                if (string.IsNullOrWhiteSpace(serialization))
+                    return CreateDefaultSettings();
+                T defaultSettings = CreateDefaultSettings();
+                JsonSerializerExt.PopulateObject<T>(serialization, defaultSettings);
+                return defaultSettings;
             }
             catch (JsonException)
             {
@@ -141,5 +144,7 @@ namespace Settings
         }
 
         #endregion
+
+        protected abstract void InitializeDefaultValues();
     }
 }

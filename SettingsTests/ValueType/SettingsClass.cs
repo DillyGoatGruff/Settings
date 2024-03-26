@@ -1,6 +1,6 @@
 ﻿using Settings;
 
-namespace SettingsTests
+namespace SettingsTests.ValueType
 {
     internal class SettingsClass : SettingsBase<SettingsClass>
     {
@@ -10,12 +10,13 @@ namespace SettingsTests
 
         public int Age { get; set; } = 33;
 
-        [Obsolete("Do not use", true)]
-        public SettingsClass() { }
-
         public SettingsClass(ISettingsSaver settingsSaver) : base(settingsSaver)
         {
 
+        }
+
+        protected override void InitializeDefaultValues()
+        {
         }
     }
 }

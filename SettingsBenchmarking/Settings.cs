@@ -9,15 +9,32 @@ namespace SettingsBenchmarking
 {
 	internal class Settings : SettingsBase<Settings>
 	{
-		public Guid id = Guid.NewGuid();
-		public string Name { get; set; } = "Bob";
-		public int Age { get; set; } = 33;
+        public Guid id = Guid.NewGuid();
+        public string Name { get; set; } = "Bob";
+        public int Age { get; set; } = 33;
 
-		[Obsolete]
-		public Settings() : base() { }
+        public Person Person { get; set; }
 
-		public Settings(ISettingsSaver settingsSaver) : base(settingsSaver)
-		{
-		}
-	}
+
+        public Settings(ISettingsSaver settingsSaver) : base(settingsSaver)
+        {
+        }
+
+        protected override void InitializeDefaultValues()
+        {
+            Person = new Person() { ID = Guid.NewGuid(), Name = "HI" };
+        }
+    }
+
+    public class Person
+    {
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+
+        public Person()
+        {
+            
+        }
+    }
 }
+
