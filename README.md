@@ -1,5 +1,5 @@
 # 2.0 Breaking Changes
-- Classes inheriting `SettingsBase<T>` no loner require a default constructor
+- Classes inheriting `SettingsBase<T>` no longer require a default constructor
 - Default values cannot be set in the constructor
 	- Default values must either be in-line assignments to properties or assigned in the `InitializeDefaultValues()`
 - Default constructors are no longer required for the settings class
