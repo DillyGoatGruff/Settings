@@ -4,6 +4,11 @@
     {
         private string _serialization = "";
 
+        public InMemorySettingsSaver(string savedSerialization = "")
+        {
+            _serialization = savedSerialization;
+        }
+
         public string GetSavedSerialization()
         {
             return _serialization;

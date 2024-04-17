@@ -9,13 +9,18 @@ namespace Settings
     /// <typeparam name="T">The settings class to save and load.</typeparam>
     public abstract class SettingsBase<T> : ISettings where T : SettingsBase<T>
     {
-        public static readonly string c_defaultFilename;
+        protected static readonly string m_defaultFilename;
 
         static readonly JsonSerializerOptions m_jsonSerializerOptions = new JsonSerializerOptions()
         {
             WriteIndented = true,
             IncludeFields = true
         };
+
+        /// <summary>
+        /// Property values thare are only to be used to load default values.
+        /// </summary>
+        private static PropertyEqualityChecker<T> m_defaultPropertyEqualityChecker;
 
         #region Fields
 
@@ -39,14 +44,14 @@ namespace Settings
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
             string assemblyDirectory = Path.GetDirectoryName(assemblyPath)!;
             string configFilename = Path.Combine(assemblyDirectory!, $"{AppDomain.CurrentDomain.FriendlyName}.cfg");
-            c_defaultFilename = configFilename;
+            m_defaultFilename = configFilename;
         }
 
         /// <summary>
         /// Base implementation of <see cref="ISettings"/>.
         /// </summary>
         /// <remarks>A <see cref="FileSettingsSaver"/> is used to save/load settings. File is saved with a .cfg extension in same directory as executable.</remarks>
-        protected SettingsBase() : this(new FileSettingsSaver(c_defaultFilename)) { }
+        protected SettingsBase() : this(new FileSettingsSaver(m_defaultFilename)) { }
 
         /// <summary>
         /// Base implementation of <see cref="ISettings"/>.
@@ -75,6 +80,9 @@ namespace Settings
             T currentSettings = (T)this;
             currentSettings.InitializeDefaultValues();
             _propertyEqualityChecker = new PropertyEqualityChecker<T>(currentSettings);
+            if (m_defaultPropertyEqualityChecker is null)
+                m_defaultPropertyEqualityChecker = _propertyEqualityChecker;
+
             _settingsSaver = settingsSaver;
 
             //If the reload returns false, the settings have not been serialized and saved before and should be saved to disk.
@@ -95,7 +103,8 @@ namespace Settings
 #else
             T defaultSettings = return (T)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(T));
 #endif
-            defaultSettings.InitializeDefaultValues();
+            m_defaultPropertyEqualityChecker.Reset(defaultSettings);
+            //defaultSettings.InitializeDefaultValues();
             return defaultSettings;
         }
 
@@ -140,6 +149,7 @@ namespace Settings
             {
                 savedSettings = Deserialize(serialization) ?? CreateDefaultSettings();
                 _propertyEqualityChecker.Reload(savedSettings);
+                _propertyEqualityChecker.UpdateSavedValues(savedSettings);
 
                 return true;
             }

@@ -76,7 +76,7 @@ namespace Settings
             // PropertyInfo should only be null for the root settings class, because it has no parent class.
             // _parentPropertyInfo should not be access anywhere in the code if PropertyEqualityChecker is for
             // the root settings class so it is being saved in a non-nullable object.
-            _parentPropertyInfo = parentPropertyInfo!; 
+            _parentPropertyInfo = parentPropertyInfo!;
 
             //TODO: upon construction, obj and defaultObj should be the same value; allowing the constructor to be simplified to only pass in one object.
             _isParentDefaultPropertyNull = defaultObj is null;
@@ -146,7 +146,7 @@ namespace Settings
         private object CreateInstance()
         {
             //Requires the type to have a default constructor
-            object obj =  Activator.CreateInstance(_parentPropertyInfo.PropertyType)!;
+            object obj = Activator.CreateInstance(_parentPropertyInfo.PropertyType)!;
             return obj;
         }
 
@@ -175,7 +175,7 @@ namespace Settings
                 {
                     object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
 
-                    if(value is null)
+                    if (value is null)
                     {
                         //Current value is null but default property is NOT null so need to instantiate a new instance so the default values can be set.
                         value = propertyEqualityChecker.CreateInstance();
@@ -202,6 +202,7 @@ namespace Settings
                 object? value = _savedPropertyInfoValues[i].Value;//propertyInfo.GetValue(newSettings);
 
                 propertyInfo.SetValue(currentSettings, value);
+
                 //_savedPropertyInfoValues[i] = _savedPropertyInfoValues[i] with { Value = value };
             }
 
@@ -220,7 +221,7 @@ namespace Settings
                 {
                     newValue = propertyEqualityChecker.CreateInstance();
                     propertyEqualityChecker.LoadDefaultValues(newValue);
-                    propertyEqualityChecker.SetPropertyValue(newSettings, newValue);
+                    propertyEqualityChecker.SetPropertyValue(currentSettings, newValue);
                     continue;
                 }
                 else if (newValue is not null && currentValue is null)
@@ -255,7 +256,7 @@ namespace Settings
                 object? value = propertyEqualityChecker.GetPropertyValue(currentSettings);
                 propertyEqualityChecker._isParentSavedPropertyNull = value is null;
 
-                if(value is not null)
+                if (value is not null)
                     propertyEqualityChecker.UpdateSavedValues(value);
             }
         }

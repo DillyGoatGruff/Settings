@@ -51,5 +51,20 @@ namespace SettingsTests.ValueType
             //Assert
             settings.CheckIsDirty().Should().BeTrue();
         }
+
+        [Fact]
+        public void PreviouslySavedTest()
+        {
+            //Arrange
+            string previouslySavedSerialization = """{ "Name": "Joe", "Age": 33, "Id": "704013b6-f37d-4d78-abc6-7094708d6a45" }""";
+            SimpleSettings settings = new SimpleSettings(new InMemorySettingsSaver(previouslySavedSerialization));
+
+            //Act
+            settings.Reload();
+
+            //Assert
+            settings.CheckIsDirty().Should().BeFalse();
+            settings.Name.Should().Be("Joe");
+        }
     }
 }
