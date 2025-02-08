@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -9,10 +9,18 @@
     <Title>Settings Saver</Title>
     <Description>Contains a base class to extend onto any serializable class which handles checking if values have changed and require saving.</Description>
     <PackageProjectUrl></PackageProjectUrl>
+	  <PackageReleaseNotes>
+		<![CDATA[
+		- Due to vulnerability in System.Text.Json version 8.0.3:
+			* Version increased to 8.0.5 for NET 6 and NET 7 due to vulnerability.
+			* Version increased to 9.0.1 for NET 8.
+		- Added NET 9 to TargetFrameworks.
+		]]>
+	  </PackageReleaseNotes>
     <RepositoryUrl>https://github.com/DillyGoatGruff/Settings</RepositoryUrl>
     <PackageTags>Settings;Serialize;Serializing;Save</PackageTags>
     <PackageId>Settings.Saver</PackageId>
-	<Version>2.0.2</Version>
+	<Version>2.1.0</Version>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<Authors>Dylan Schweiss</Authors>
 	<Company></Company>
@@ -22,8 +30,12 @@
 		<None Include="..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="System.Text.Json" Version="8.0.3" />
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0'" >
+		<PackageReference Include="System.Text.Json" Version="8.0.5" />
+	</ItemGroup>
+	
+	<ItemGroup Condition="'$(TargetFramework)' != 'net6.0' And '$(TargetFramework)' != 'net7.0'" >
+		<PackageReference Include="System.Text.Json" Version="9.0.1" />
 	</ItemGroup>
 	
 </Project>
